@@ -1,0 +1,8 @@
+cache:
+  algorithm: LRU
+  max-size: 1000
+database:
+  driver-class-name: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/myClevertecDB
+  username: alex
+  password: alex

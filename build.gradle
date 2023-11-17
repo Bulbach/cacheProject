@@ -21,17 +21,24 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     runtimeOnly 'org.aspectj:aspectjweaver:1.9.20.1'
     implementation 'com.github.ben-manes.caffeine:caffeine:2.9.0'
-
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+    implementation 'org.aspectj:aspectjweaver:1.9.7'
+    implementation 'com.mchange:c3p0:0.9.5.5'
     implementation 'com.google.code.gson:gson:2.10.1'
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}'
+    implementation 'org.yaml:snakeyaml:2.2'
+    implementation 'org.springframework:spring-jdbc:6.0.13'
 
-    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}'
 
-    testImplementation 'org.mockito:mockito-junit-jupiter:${mockitoVersion}'
-    testImplementation('org.junit.jupiter:junit-jupiter-params:${junitVersion}')
-    testImplementation 'org.assertj:assertj-core:3.24.2'
-    testImplementation('org.junit.jupiter:junit-jupiter-api:${junitVersion}')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:${junitVersion}')
+    implementation ("org.postgresql:postgresql:42.2.27")
+    testImplementation ("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+
+    testImplementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
+
+    testImplementation ("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
+    testImplementation ("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
+    testImplementation ("org.assertj:assertj-core:3.24.2")
+    testImplementation ("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
 
 test {
