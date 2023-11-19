@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public interface AbstractRepository <T> {
 
-    Collection<T> getAll();
+    Collection<T> findAll();
 
-   Optional<T> getById(UUID id) ;
+   Optional<T> findById(UUID id) ;
 
     T create(T item) ;
 

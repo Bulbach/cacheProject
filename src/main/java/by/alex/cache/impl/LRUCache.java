@@ -1,13 +1,26 @@
-package by.alex.cache;
+package by.alex.cache.impl;
 
+import by.alex.cache.AbstractCache;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class LRUCache<K, V> {
+public class LRUCache<K, V> implements AbstractCache<K, V> {
+
+    /**
+     * Переменная, которая определяет максимальный размер кэша.
+     */
     private final int capacity;
+    /**
+     * Используется для хранения ключей и значений элементов кэша.
+     */
     private final Map<K, V> cache;
+    /**
+     * Для сохранения порядка использования
+     */
     private final Set<K> keyOrder;
 
     public LRUCache(int capacity) {
@@ -39,15 +52,29 @@ public class LRUCache<K, V> {
             keyOrder.add(key);
         }
     }
+    public Collection<V> getAllValues() {
+        return cache.values();
+    }
 
     private void updateKeyOrder(K key) {
         keyOrder.remove(key);
         keyOrder.add(key);
     }
 
-    private void evict() {
+    public void delete(K key) {
+        if (cache.containsKey(key)) {
+            cache.remove(key);
+            keyOrder.remove(key);
+        }
+    }
+    public void evict() {
         K evictKey = keyOrder.iterator().next();
         keyOrder.remove(evictKey);
         cache.remove(evictKey);
+    }
+
+    @Override
+    public boolean containsKey(K id) {
+        return cache.containsKey(id);
     }
 }

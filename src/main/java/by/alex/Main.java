@@ -1,51 +1,53 @@
 package by.alex;
 
 
+import by.alex.dto.WagonDto;
 import by.alex.entity.Wagon;
-import by.alex.repository.impl.WagonRepository;
+import by.alex.mapper.WagonMapper;
+import by.alex.service.WagonService;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 
 public class Main {
     public static void main(String[] args) {
 
         Runner runner = new Runner();
-
-        WagonRepository wagonRepository = new WagonRepository();
+        WagonMapper wagonMapper = runner.getObject(WagonMapper.class);
+        WagonService service = runner.getObject(WagonService.class);
 
         UUID uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        Optional<Wagon> wagon = wagonRepository.getById(uuid);
-        System.out.println(wagon);
+        Object byId = service.getById(uuid);
+        System.out.println("Wagon by ID " + byId);
+
+
         Wagon wag = Wagon.builder()
-                .id(UUID.fromString("b2596554-f405-4f4d-ade2-d7b462280321"))
                 .wagonNumber("28813186")
                 .loadCapacity(64)
                 .yearOfConstruction(2001)
                 .dateOfLastService(LocalDate.now())
                 .build();
-
-        Wagon wagon1 = wagonRepository.create(wag);
-        System.out.println("Wagon was created "+ wagon1);
+        WagonDto dto = wagonMapper.toDto(wag);
+        WagonDto createdWagon = service.create(dto);
+        System.out.println("Created wagon " + createdWagon);
 
         Wagon wagUpdate = Wagon.builder()
-                .id(UUID.fromString("b2596554-f405-4f4d-ade2-d7b462280321"))
+                .id(createdWagon.id())
                 .wagonNumber("28813186")
                 .loadCapacity(64)
                 .yearOfConstruction(1999)
                 .dateOfLastService(LocalDate.now())
                 .build();
-        Wagon wagon2 = wagonRepository.update(wagUpdate);
+        WagonDto wagon2 = service.update(wagonMapper.toDto(wagUpdate));
         System.out.println("Wagon was updated " + wagon2);
 
-        Collection<Wagon> all = wagonRepository.getAll();
-        System.out.println(all);
+        Collection<WagonDto> all = service.getAll();
+        System.out.println("Before delete " + all);
 
-        wagonRepository.delete(uuid);
+        service.delete(uuid);
 
-        Collection<Wagon> alldel = wagonRepository.getAll();
-        System.out.println(alldel);
+        Collection<WagonDto> allAfterDel = service.getAll();
+        System.out.println("After delete " + allAfterDel);
     }
 }
