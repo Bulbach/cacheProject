@@ -34,8 +34,7 @@ dependencies {
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
     implementation 'ch.qos.logback:logback-core:1.4.11'
     implementation 'ch.qos.logback:logback-access:1.4.11'
-    implementation 'com.itextpdf:itextpdf:5.5.13.3'
-
+    implementation 'com.itextpdf:itext7-core:7.0.4'
 
     testImplementation 'ch.qos.logback:logback-classic:1.4.11'
 
