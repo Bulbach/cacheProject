@@ -5,6 +5,8 @@ import by.alex.dto.WagonDto;
 import by.alex.entity.Wagon;
 import by.alex.mapper.WagonMapper;
 import by.alex.service.WagonService;
+import by.alex.util.print.PrintInfo;
+import by.alex.util.print.TransformationObject;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -16,9 +18,13 @@ public class Main {
         Runner runner = new Runner();
         WagonMapper wagonMapper = runner.getObject(WagonMapper.class);
         WagonService service = runner.getObject(WagonService.class);
+        TransformationObject transform = new TransformationObject();
+        PrintInfo printInfo = new PrintInfo();
 
         UUID uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        Object byId = service.getById(uuid);
+        WagonDto byId = service.getById(uuid);
+
+        printInfo.print(byId);
         System.out.println("Wagon by ID " + byId);
 
 
