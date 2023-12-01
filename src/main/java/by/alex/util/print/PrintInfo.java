@@ -1,15 +1,10 @@
 package by.alex.util.print;
 
-import com.itextpdf.kernel.color.Color;
-import com.itextpdf.kernel.events.Event;
-import com.itextpdf.kernel.events.IEventHandler;
-import com.itextpdf.kernel.events.PdfDocumentEvent;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
@@ -41,16 +36,24 @@ public class PrintInfo {
         Object firstObject = list.iterator().next();
         Class<?> objectClass = firstObject.getClass();
         PdfDocument pdf = createPdf(firstObject.getClass().getSimpleName() + "table");
-
         Document document = createDocument(objectClass, pdf);
         Table tableForPrintAllObject = createTableForPrintAllObject(firstObject);
         addRows(tableForPrintAllObject, list);
         document.add(tableForPrintAllObject);
 
-
         document.close();
     }
 
+    private static int getNumberOfColumns(Object o) {
+        return o.getClass().getDeclaredFields().length;
+    }
+
+    private static void addColumnHeaders(Table table, Object object) {
+        Field[] fields = object.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            table.addHeaderCell(new Cell().add(field.getName()));
+        }
+    }
 
     private Table createTableForPrintAllObject(Object object) {
         Table table = new Table(getNumberOfColumns(object));
@@ -74,17 +77,6 @@ public class PrintInfo {
         }
     }
 
-    private static int getNumberOfColumns(Object o) {
-        return o.getClass().getDeclaredFields().length;
-    }
-
-    private static void addColumnHeaders(Table table, Object object) {
-        Field[] fields = object.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            table.addHeaderCell(new Cell().add(field.getName()));
-        }
-    }
-
     public PdfDocument createPdf(String path) {
         PdfDocument pdf;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
@@ -99,26 +91,6 @@ public class PrintInfo {
                 PdfPage page = existingPdf.getPage(pageNum).copyTo(pdf);
                 pdf.addPage(page);
             }
-
-            pdf.addEventHandler(PdfDocumentEvent.END_PAGE, new IEventHandler() {
-                @Override
-                public void handleEvent(Event event) {
-                    PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
-                    PdfDocument pdfDoc = docEvent.getDocument();
-                    PdfPage page = docEvent.getPage();
-
-                    PdfCanvas canvas = new PdfCanvas(page.newContentStreamBefore(), page.getResources(), pdfDoc);
-
-                    // Добавление фона
-                    canvas.saveState()
-                            .setFillColor(Color.LIGHT_GRAY)
-                            .rectangle(36, 36, 523, 770)
-                            .fill()
-                            .restoreState();
-
-                    canvas.release();
-                }
-            });
 
         } catch (IOException e) {
             throw new RuntimeException(e);
