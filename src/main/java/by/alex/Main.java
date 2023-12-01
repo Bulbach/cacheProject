@@ -49,6 +49,7 @@ public class Main {
         System.out.println("Wagon was updated " + wagon2);
 
         Collection<WagonDto> all = service.getAll();
+        printInfo.printAll(all);
         System.out.println("Before delete " + all);
 
         service.delete(uuid);
