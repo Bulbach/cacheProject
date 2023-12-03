@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 
 public class LFUCache<K, V> implements AbstractCache<K, V> {
 
@@ -39,66 +40,55 @@ public class LFUCache<K, V> implements AbstractCache<K, V> {
     }
 
     public V get(K key) {
-        if (cache.containsKey(key)) {
-            updateFrequency(key);
-            return cache.get(key);
-        }
-        return null;
+        return Optional.ofNullable(cache.get(key))
+                .map(value -> {
+                    updateFrequency(key);
+                    return value;
+                })
+                .orElse(null);
     }
 
     public void put(K key, V value) {
-        if (capacity == 0) {
-            return;
-        }
-        if (cache.containsKey(key)) {
-            cache.put(key, value);
-            updateFrequency(key);
-        } else {
-            if (cache.size() >= capacity) {
-                evict();
+        cache.compute(key, (k, v) -> {
+            if (v != null) {
+                updateFrequency(k);
+                return value;
+            } else {
+                if (cache.size() >= capacity) {
+                    evict();
+                }
+                frequency.put(key, 1);
+                frequencyLists.computeIfAbsent(1, k2 -> new LinkedHashSet<>()).add(key);
+                return value;
             }
-            cache.put(key, value);
-            frequency.put(key, 1);
-            frequencyLists.get(1).add(key);
-        }
+        });
     }
 
-    @Override
     public Collection<V> getAllValues() {
         return cache.values();
     }
 
     private void updateFrequency(K key) {
-        int freq = frequency.get(key);
-        frequency.put(key, freq + 1);
-        frequencyLists.get(freq).remove(key);
-        if (!frequencyLists.containsKey(freq + 1)) {
-            frequencyLists.put(freq + 1, new LinkedHashSet<>());
-        }
-        frequencyLists.get(freq + 1).add(key);
-        if (frequencyLists.get(freq).isEmpty()) {
-            frequencyLists.remove(freq);
-        }
-    }
-    public void delete(K key) {
-        if (cache.containsKey(key)) {
-            int freq = frequency.get(key);
-            frequencyLists.get(freq).remove(key);
-            if (frequencyLists.get(freq).isEmpty()) {
-                frequencyLists.remove(freq);
+        frequency.compute(key, (k, v) -> {
+            int freq = v != null ? v + 1 : 1;
+            frequencyLists.computeIfAbsent(freq, k2 -> new LinkedHashSet<>()).add(key);
+            if (v != null) {
+                frequencyLists.get(v).remove(key);
             }
-            cache.remove(key);
-            frequency.remove(key);
-        }
+            return freq;
+        });
+    }
+
+    public void delete(K key) {
+        cache.remove(key);
+        frequency.remove(key);
+        frequencyLists.values().forEach(set -> set.remove(key));
     }
 
     public void evict() {
-        int minFreq = frequencyLists.keySet().iterator().next();
+        int minFreq = frequencyLists.keySet().stream().min(Integer::compareTo).orElse(0);
         K evictKey = frequencyLists.get(minFreq).iterator().next();
         frequencyLists.get(minFreq).remove(evictKey);
-        if (frequencyLists.get(minFreq).isEmpty()) {
-            frequencyLists.remove(minFreq);
-        }
         cache.remove(evictKey);
         frequency.remove(evictKey);
     }

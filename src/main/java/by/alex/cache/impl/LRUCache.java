@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class LRUCache<K, V> implements AbstractCache<K, V> {
@@ -30,28 +31,32 @@ public class LRUCache<K, V> implements AbstractCache<K, V> {
     }
 
     public V get(K key) {
-        if (cache.containsKey(key)) {
-            updateKeyOrder(key);
-            return cache.get(key);
-        }
-        return null;
+        return Optional.ofNullable(cache.get(key))
+                .map(value -> {
+                    updateKeyOrder(key);
+                    return value;
+                })
+                .orElse(null);
     }
 
     public void put(K key, V value) {
         if (capacity == 0) {
             return;
         }
-        if (cache.containsKey(key)) {
-            cache.put(key, value);
-            updateKeyOrder(key);
-        } else {
-            if (cache.size() >= capacity) {
-                evict();
+        cache.compute(key, (k, v) -> {
+            if (v != null) {
+                updateKeyOrder(k);
+                return value;
+            } else {
+                if (cache.size() >= capacity) {
+                    evict();
+                }
+                keyOrder.add(key);
+                return value;
             }
-            cache.put(key, value);
-            keyOrder.add(key);
-        }
+        });
     }
+
     public Collection<V> getAllValues() {
         return cache.values();
     }
@@ -62,11 +67,10 @@ public class LRUCache<K, V> implements AbstractCache<K, V> {
     }
 
     public void delete(K key) {
-        if (cache.containsKey(key)) {
-            cache.remove(key);
-            keyOrder.remove(key);
-        }
+        cache.remove(key);
+        keyOrder.remove(key);
     }
+
     public void evict() {
         K evictKey = keyOrder.iterator().next();
         keyOrder.remove(evictKey);
@@ -74,7 +78,7 @@ public class LRUCache<K, V> implements AbstractCache<K, V> {
     }
 
     @Override
-    public boolean containsKey(K id) {
-        return cache.containsKey(id);
+    public boolean containsKey(K key) {
+        return cache.containsKey(key);
     }
 }
