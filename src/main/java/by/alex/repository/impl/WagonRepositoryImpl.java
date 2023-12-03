@@ -18,8 +18,8 @@ import java.util.UUID;
 
 public class WagonRepositoryImpl implements WagonRepository {
 
-    private JdbcTemplate jdbcTemplate;
-    private DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
 
     public WagonRepositoryImpl() {
 

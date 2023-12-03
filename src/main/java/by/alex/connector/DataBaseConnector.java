@@ -3,13 +3,15 @@ package by.alex.connector;
 import by.alex.util.ApplicationProperties;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import lombok.Data;
+
 import javax.sql.DataSource;
-import static by.alex.constant.ConstantApp.DATABASE_DRIVER_KEY;
-import static by.alex.constant.ConstantApp.DATABASE_URL_KEY;
-import static by.alex.constant.ConstantApp.DATABASE_USER_KEY;
-import static by.alex.constant.ConstantApp.DATABASE_PASSWORD_KEY;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import static by.alex.constant.ConstantApp.DATABASE_DRIVER_KEY;
+import static by.alex.constant.ConstantApp.DATABASE_PASSWORD_KEY;
+import static by.alex.constant.ConstantApp.DATABASE_URL_KEY;
+import static by.alex.constant.ConstantApp.DATABASE_USER_KEY;
 
 
 @Data
@@ -47,15 +49,7 @@ public final class DataBaseConnector {
     }
 
     public Connection getConnection() throws SQLException {
-        ComboPooledDataSource dataSource = new ComboPooledDataSource();
-        dataSource.setJdbcUrl(DATABASE_URL);
-        dataSource.setUser(DATABASE_USER);
-        dataSource.setPassword(DATABASE_PASSWORD);
-        dataSource.setInitialPoolSize(5);
-        dataSource.setMinPoolSize(3);
-        dataSource.setMaxPoolSize(10);
-
-        return dataSource.getConnection();
+        return getDataSource().getConnection();
     }
 
     public DataSource getDataSource() throws SQLException {

@@ -1,9 +1,10 @@
-package by.alex.util;
+package by.alex.util.print;
 
+import by.alex.dto.WagonDto;
 import by.alex.exceptions.CacheException;
+import by.alex.util.print.adaptor.WagonDtoAdapter;
 import com.google.gson.Gson;
-
-import java.io.Serializable;
+import com.google.gson.GsonBuilder;
 
 public class TransformationObject {
 
@@ -13,11 +14,13 @@ public class TransformationObject {
         this.gson = new Gson();
     }
 
-    public String objectToString(Serializable object) throws CacheException {
+    public String objectToString(Object object) throws CacheException {
         try {
 
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(WagonDto.class, new WagonDtoAdapter());
+            Gson gson = gsonBuilder.setPrettyPrinting().create();
             return gson.toJson(object);
-
         } catch (Exception e) {
             throw new CacheException("Не удалась cериализация объекта");
         }

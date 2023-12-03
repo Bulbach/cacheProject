@@ -37,7 +37,7 @@ public class WagonServiceImpl implements WagonService {
             return wagonDto;
         }
         //ToDO
-        throw new CacheException(" ");
+        throw new CacheException("Error with findById result is  ");
     }
 
     public List<WagonDto> getAll() {
