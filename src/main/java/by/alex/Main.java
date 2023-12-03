@@ -6,7 +6,6 @@ import by.alex.entity.Wagon;
 import by.alex.mapper.WagonMapper;
 import by.alex.service.WagonService;
 import by.alex.util.print.PrintInfo;
-import by.alex.util.print.TransformationObject;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -18,7 +17,6 @@ public class Main {
         Runner runner = new Runner();
         WagonMapper wagonMapper = runner.getObject(WagonMapper.class);
         WagonService service = runner.getObject(WagonService.class);
-        TransformationObject transform = new TransformationObject();
         PrintInfo printInfo = new PrintInfo();
 
         UUID uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
@@ -26,7 +24,8 @@ public class Main {
 
         printInfo.print(byId);
         System.out.println("Wagon by ID " + byId);
-
+        Collection<WagonDto> all = service.getAll();
+        printInfo.printAll(all);
 
         Wagon wag = Wagon.builder()
                 .wagonNumber("28813186")
@@ -48,9 +47,9 @@ public class Main {
         WagonDto wagon2 = service.update(wagonMapper.toDto(wagUpdate));
         System.out.println("Wagon was updated " + wagon2);
 
-        Collection<WagonDto> all = service.getAll();
-        printInfo.printAll(all);
-        System.out.println("Before delete " + all);
+        Collection<WagonDto> changedAll = service.getAll();
+        printInfo.printAll(changedAll);
+        System.out.println("Before delete " + changedAll);
 
         service.delete(uuid);
 

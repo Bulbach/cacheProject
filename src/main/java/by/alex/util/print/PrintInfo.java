@@ -23,10 +23,11 @@ public class PrintInfo {
     private static final String OUTPUT_PDF = "output";
     public static final String CLEVERTEC_TEMPLATE_PDF = "src/main/resources/Clevertec_Template.pdf";
 
-    public void print(Object object) {
+    public <T> void print(T object) {
         PdfDocument pdf = createPdf(object.getClass().getSimpleName());
         Document document = createDocument(object, pdf);
         Paragraph paragraph = createParagraphPrintInfo(object);
+
         document.add(paragraph);
         document.close();
     }
@@ -35,27 +36,28 @@ public class PrintInfo {
 
         Object firstObject = list.iterator().next();
         Class<?> objectClass = firstObject.getClass();
+
         PdfDocument pdf = createPdf(firstObject.getClass().getSimpleName() + "table");
         Document document = createDocument(objectClass, pdf);
         Table tableForPrintAllObject = createTableForPrintAllObject(firstObject);
         addRows(tableForPrintAllObject, list);
-        document.add(tableForPrintAllObject);
 
+        document.add(tableForPrintAllObject);
         document.close();
     }
 
-    private static int getNumberOfColumns(Object o) {
+    private static <T> int getNumberOfColumns(T o) {
         return o.getClass().getDeclaredFields().length;
     }
 
-    private static void addColumnHeaders(Table table, Object object) {
+    private static <T> void addColumnHeaders(Table table, T object) {
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields) {
             table.addHeaderCell(new Cell().add(field.getName()));
         }
     }
 
-    private Table createTableForPrintAllObject(Object object) {
+    private <T> Table createTableForPrintAllObject(T object) {
         Table table = new Table(getNumberOfColumns(object));
         table.setTextAlignment(TextAlignment.CENTER);
         addColumnHeaders(table, object);
@@ -99,17 +101,16 @@ public class PrintInfo {
         return pdf;
     }
 
-    private static Document createDocument(Object object, PdfDocument pdf) {
+    private static <T> Document createDocument(T object, PdfDocument pdf) {
         Document document = new Document(pdf, PageSize.A4, true);
         document.add(new Paragraph("Info about " + object.getClass().getSimpleName())
                 .setMargins(200, 100, 10, 200)
         );
 
         return document;
-
     }
 
-    private Paragraph createParagraphPrintInfo(Object objectDto) {
+    private <T> Paragraph createParagraphPrintInfo(T objectDto) {
         Paragraph paragraph = new Paragraph();
         paragraph.setMargins(10, 50, 50, 10);
         Field[] fields = objectDto.getClass().getDeclaredFields();
@@ -132,6 +133,5 @@ public class PrintInfo {
         }
         return paragraph;
     }
-
 
 }
