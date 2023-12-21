@@ -7,6 +7,8 @@ import java.util.UUID;
 public interface AbstractRepository <T> {
 
     Collection<T> findAll();
+    Collection<T> findAll(int page,int size);
+
 
    Optional<T> findById(UUID id) ;
 

@@ -47,7 +47,7 @@ public class CachingAspect {
 
         WagonDto createdWagonDto = (WagonDto) joinPoint.proceed();
         logger.info("Created wagon " + createdWagonDto);
-        cache.put(createdWagonDto.id(), createdWagonDto);
+        cache.put(createdWagonDto.getId(), createdWagonDto);
 
         return createdWagonDto;
     }
@@ -61,7 +61,7 @@ public class CachingAspect {
 
         WagonDto updated = (WagonDto) joinPoint.proceed();
         logger.info("Updated wagon " + updated);
-        cache.put(updated.id(), updated);
+        cache.put(updated.getId(), updated);
         return updated;
     }
 

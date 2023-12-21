@@ -40,6 +40,15 @@ public class WagonRepositoryImpl implements WagonRepository {
         return wagons;
     }
 
+//    @Override
+    public Collection<Wagon> findAll(int page, int pageSize) {
+        int offset = (page - 1) * pageSize;  // Вычисляем смещение на основе номера страницы
+        String sql = "SELECT w.id, w.wagonNumber, w.loadCapacity, w.yearOfConstruction, w.dateOfLastService FROM wagons w LIMIT ? OFFSET ?";
+        RowMapper<Wagon> rowMapper = new WagonResultSetMapperImpl();
+        List<Wagon> wagons = jdbcTemplate.query(sql, rowMapper, pageSize, offset);
+        return wagons;
+    }
+
     @Override
     public Optional<Wagon> findById(UUID id) {
 

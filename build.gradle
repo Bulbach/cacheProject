@@ -1,11 +1,12 @@
 plugins {
     id 'java'
+    id 'war'
     id "io.freefair.lombok" version "6.5.1"
     id "io.freefair.aspectj.post-compile-weaving" version "6.4.1"
 }
 
 group = 'by.alex'
-version = '1.0-SNAPSHOT'
+//version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -37,7 +38,7 @@ dependencies {
     implementation 'com.itextpdf:itext7-core:7.0.4'
     implementation 'org.apache.pdfbox:pdfbox:2.0.24'
     implementation 'commons-io:commons-io:2.15.1'
-
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     implementation 'org.codehaus.groovy:groovy-all:2.4.21'
     implementation("org.postgresql:postgresql:42.2.27")
     testImplementation 'ch.qos.logback:logback-classic:1.4.11'

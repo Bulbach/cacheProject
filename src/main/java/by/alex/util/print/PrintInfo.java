@@ -13,6 +13,7 @@ import com.itextpdf.layout.property.TextAlignment;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -22,6 +23,7 @@ public class PrintInfo {
 
     private static final String OUTPUT_PDF = "output";
     public static final String CLEVERTEC_TEMPLATE_PDF = "src/main/resources/Clevertec_Template.pdf";
+    public static final String CLEVERTEC_TEMPLATE_PDF_WEB = "Clevertec_Template.pdf";
 
     public <T> void print(T object) {
         PdfDocument pdf = createPdf(object.getClass().getSimpleName());
@@ -30,6 +32,17 @@ public class PrintInfo {
 
         document.add(paragraph);
         document.close();
+    }
+
+    public PdfDocument getPdfObject(Object object, OutputStream out) {
+        PdfDocument pdf = new PdfDocument(new PdfWriter(out));
+        PdfDocument pdfSubstrate = createPdf(pdf);
+        Document document = createDocument(object, pdfSubstrate);
+        Paragraph paragraph = createParagraphPrintInfo(object);
+
+        document.add(paragraph);
+        document.close();
+        return pdf;
     }
 
     public void printAll(Collection<?> list) {
@@ -89,6 +102,24 @@ public class PrintInfo {
             pdf = new PdfDocument(new PdfWriter(new FileOutputStream(
                     OUTPUT_PDF + "/" + path + dateAndTime + ".pdf"
             )));
+            for (int pageNum = 1; pageNum <= existingPdf.getNumberOfPages(); pageNum++) {
+                PdfPage page = existingPdf.getPage(pageNum).copyTo(pdf);
+                pdf.addPage(page);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return pdf;
+    }
+
+    public PdfDocument createPdf(PdfDocument pdf) {
+        try {
+
+            PdfDocument existingPdf = new PdfDocument
+                    (new PdfReader
+                            (PrintInfo.class.getClassLoader().getResource(CLEVERTEC_TEMPLATE_PDF_WEB).openStream()));
             for (int pageNum = 1; pageNum <= existingPdf.getNumberOfPages(); pageNum++) {
                 PdfPage page = existingPdf.getPage(pageNum).copyTo(pdf);
                 pdf.addPage(page);

@@ -51,6 +51,17 @@ public class WagonServiceImpl implements WagonService {
             throw new CacheException("Error occurred while retrieving wagons" + e.getMessage());
         }
     }
+    public List<WagonDto> getAll(int page, int pageSize) {
+        try {
+            Collection<Wagon> wagons = wagonRepository.findAll(page, pageSize);
+
+            return wagons.stream()
+                    .map(wagonMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new CacheException("Error occurred while retrieving wagons" + e.getMessage());
+        }
+    }
 
     @Override
     @CustomCachebleCreate

@@ -1,6 +1,5 @@
 package by.alex.util;
 
-import lombok.Data;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -8,8 +7,9 @@ import java.util.Map;
 
 import static by.alex.constant.ConstantApp.DATABASE_PROPERTIES_FILE_PATH;
 
-@Data
+
 public class ApplicationProperties {
+
     private static final Map<String, String> properties;
     private static final Map<String, String> cacheProperties;
 

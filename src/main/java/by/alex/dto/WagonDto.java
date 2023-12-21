@@ -1,13 +1,15 @@
 package by.alex.dto;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.UUID;
+import lombok.Builder;
+import lombok.Data;
 
-public record WagonDto (
-        UUID id,
-        String wagonNumber,
-        int loadCapacity,
-        int yearOfConstruction,
-        LocalDate dateOfLastService) {
+import java.util.UUID;
+@Data
+@Builder
+public class WagonDto {
+  private   UUID id;
+  private   String wagonNumber;
+  private   int loadCapacity;
+  private   int yearOfConstruction;
+  private   String dateOfLastService;
 }

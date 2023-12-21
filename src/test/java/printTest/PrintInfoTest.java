@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -90,64 +89,94 @@ public class PrintInfoTest {
 
         Collection<Object> testData = new ArrayList<>();
         testData.add(
-                new WagonDto(UUID.fromString("11111111-1111-1111-1111-111111111111")
-                        , "WGN001"
-                        , 5000
-                        , 2020
-                        , LocalDate.of(2022, 01, 01)));
-        testData.add(new WagonDto(UUID.fromString("22222222-2222-2222-2222-222222222222")
-                , "WGN002"
-                , 6000
-                , 2019
-                , LocalDate.of(2021, 07, 15))
+                WagonDto.builder()
+                        .id(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+                        .wagonNumber("WGN001")
+                        .loadCapacity(5000)
+                        .yearOfConstruction(2020)
+                        .dateOfLastService("2022-01-01")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("33333333-3333-3333-3333-333333333333")
-                , "WGN003"
-                , 4500
-                , 2021
-                , LocalDate.of(2022, 9, 30))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("22222222-2222-2222-2222-222222222222"))
+                        .wagonNumber("WGN002")
+                        .loadCapacity(6000)
+                        .yearOfConstruction(2019)
+                        .dateOfLastService("2021-07-15")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("44444444-4444-4444-4444-444444444444")
-                , "WGN004"
-                , 5500
-                , 2020
-                , LocalDate.of(2022, 03, 20))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("33333333-3333-3333-3333-333333333333"))
+                        .wagonNumber("WGN003")
+                        .loadCapacity(4500)
+                        .yearOfConstruction(2021)
+                        .dateOfLastService("2022-09-30")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("55555555-5555-5555-5555-555555555555")
-                , "WGN006"
-                , 6500
-                , 2019
-                , LocalDate.of(2022, 06, 05))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("44444444-4444-4444-4444-444444444444"))
+                        .wagonNumber("WGN004")
+                        .loadCapacity(5500)
+                        .yearOfConstruction(2020)
+                        .dateOfLastService("2022-03-20")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("66666666-6666-6666-6666-666666666666")
-                , "WGN002"
-                , 6000
-                , 2019
-                , LocalDate.of(2021, 07, 15))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("55555555-5555-5555-5555-555555555555"))
+                        .wagonNumber("WGN006")
+                        .loadCapacity(6500)
+                        .yearOfConstruction(2019)
+                        .dateOfLastService("2021-11-10")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("77777777-7777-7777-7777-777777777777")
-                , "WGN007"
-                , 4800
-                , 2021
-                , LocalDate.of(2022, 8, 12))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("66666666-6666-6666-6666-666666666666"))
+                        .wagonNumber("WGN002")
+                        .loadCapacity(6000)
+                        .yearOfConstruction(2019)
+                        .dateOfLastService("2022-06-05")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("88888888-8888-8888-8888-888888888888")
-                , "WGN008"
-                , 5200
-                , 2020
-                , LocalDate.of(2022, 4, 25))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("77777777-7777-7777-7777-777777777777"))
+                        .wagonNumber("WGN007")
+                        .loadCapacity(4800)
+                        .yearOfConstruction(2021)
+                        .dateOfLastService("2022-08-12")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("99999999-9999-9999-9999-999999999999")
-                , "WGN009"
-                , 4300
-                , 2018
-                , LocalDate.of(2021, 12, 01))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("88888888-8888-8888-8888-888888888888"))
+                        .wagonNumber("WGN008")
+                        .loadCapacity(5200)
+                        .yearOfConstruction(2020)
+                        .dateOfLastService("2022-04-25")
+                        .build()
         );
-        testData.add(new WagonDto(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                , "WGN010"
-                , 5800
-                , 2019
-                , LocalDate.of(2022, 7, 18))
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("99999999-9999-9999-9999-999999999999"))
+                        .wagonNumber("WGN009")
+                        .loadCapacity(4300)
+                        .yearOfConstruction(2018)
+                        .dateOfLastService("2021-12-01")
+                        .build()
+        );
+        testData.add(
+                WagonDto.builder()
+                        .id(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))
+                        .wagonNumber("WGN010")
+                        .loadCapacity(5800)
+                        .yearOfConstruction(2019)
+                        .dateOfLastService("2022-07-18")
+                        .build()
         );
         return testData;
     }
