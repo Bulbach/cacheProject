@@ -2,7 +2,6 @@ package by.alex;
 
 import by.alex.mapper.WagonMapper;
 import by.alex.mapper.WagonMapperImpl;
-import by.alex.repository.AbstractRepository;
 import by.alex.repository.WagonRepository;
 import by.alex.repository.impl.WagonRepositoryImpl;
 import by.alex.service.WagonService;
@@ -31,7 +30,7 @@ public class Runner {
         }
     }
 
-    private void createObjects() {
+      void createObjects() {
 
         WagonRepository wagonRepository = new WagonRepositoryImpl();
         container.put(WagonRepository.class, wagonRepository);

@@ -7,6 +7,7 @@ public interface AbstractService<T> {
     T getById(UUID id);
 
     List<T> getAll();
+    List<T> getAll(int page, int size);
 
     T create(T t);
 
