@@ -118,4 +118,15 @@ public class WagonRepositoryImpl implements WagonRepository {
             throw new RuntimeException("Failed to delete wagon. " + e.getMessage());
         }
     }
+
+    @Override
+    public Optional<Wagon> findByWagonNumber(String wagonNumber) {
+        String sql = "SELECT * FROM wagons WHERE wagonNumber = ?";
+        RowMapper<Wagon> rowMapper = new WagonResultSetMapperImpl();
+        List<Wagon> wagons = jdbcTemplate.query(sql, new Object[]{wagonNumber}, rowMapper);
+        if (!wagons.isEmpty()) {
+            return Optional.of(wagons.get(0));
+        }
+        return Optional.empty();
+    }
 }

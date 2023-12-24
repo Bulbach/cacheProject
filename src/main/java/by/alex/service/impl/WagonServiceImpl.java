@@ -36,9 +36,10 @@ public class WagonServiceImpl implements WagonService {
 
             return wagonDto;
         }
-        //ToDO
+
         throw new CacheException("Error with findById result is  ");
     }
+
 
     public List<WagonDto> getAll() {
         try {
@@ -51,6 +52,7 @@ public class WagonServiceImpl implements WagonService {
             throw new CacheException("Error occurred while retrieving wagons" + e.getMessage());
         }
     }
+
     public List<WagonDto> getAll(int page, int pageSize) {
         try {
             Collection<Wagon> wagons = wagonRepository.findAll(page, pageSize);
@@ -96,5 +98,14 @@ public class WagonServiceImpl implements WagonService {
     @CustomCachebleDelete
     public void delete(UUID id) {
         wagonRepository.delete(id);
+    }
+
+    public boolean isExist(String wagonNumber) {
+        Optional<Wagon> existingWagon = wagonRepository.findByWagonNumber(wagonNumber);
+        return existingWagon.isPresent();
+    }
+    public boolean isExist(UUID wagonUUID) {
+        Optional<Wagon> existingWagon = wagonRepository.findById(wagonUUID);
+        return existingWagon.isPresent();
     }
 }

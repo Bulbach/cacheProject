@@ -59,7 +59,7 @@ private LRUCache<String, Wagon> cache;
         cache.get(uuid2.toString());
         cache.put(uuid4.toString(), wagon4);
 
-        assertNull(cache.get(uuid3.toString())); // WagonDto3 should be evicted
+        assertNull(cache.get(uuid3.toString()));
         assertEquals(wagon1, cache.get(uuid1.toString()));
         assertEquals(wagon2, cache.get(uuid2.toString()));
         assertEquals(wagon4, cache.get(uuid4.toString()));
