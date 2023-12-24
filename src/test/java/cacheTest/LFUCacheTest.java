@@ -1,7 +1,6 @@
 package cacheTest;
 
 import by.alex.cache.impl.LFUCache;
-import by.alex.dto.WagonDto;
 import by.alex.entity.Wagon;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,6 @@ public class LFUCacheTest {
         cache.put(uuid2.toString(), wagon2);
         cache.put(uuid3.toString(), wagon3);
 
-        cache.get(uuid1.toString());
         cache.get(uuid1.toString());
         cache.get(uuid2.toString());
         cache.get(uuid2.toString());

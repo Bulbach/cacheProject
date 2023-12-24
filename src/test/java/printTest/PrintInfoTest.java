@@ -25,7 +25,7 @@ public class PrintInfoTest {
         Collection<Object> testData = createTestData();
 
         // given
-        printInfo.printAll(testData);
+        printInfo.saveAllPdfObjectToFile(testData);
         // then
         assertTrue(new File("output/").exists());
 

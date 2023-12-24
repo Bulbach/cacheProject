@@ -3,11 +3,11 @@ package by.alex.cache.impl;
 import by.alex.cache.AbstractCache;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public class LRUCache<K, V> implements AbstractCache<K, V> {
 
@@ -22,59 +22,59 @@ public class LRUCache<K, V> implements AbstractCache<K, V> {
     /**
      * Для сохранения порядка использования
      */
-    private final Set<K> keyOrder;
+    private final Map<K, Integer> accessOrder;
+    private final Deque<K> accessQueue;
 
     public LRUCache(int capacity) {
         this.capacity = capacity;
         this.cache = new HashMap<>();
-        this.keyOrder = new LinkedHashSet<>();
+        this.accessOrder = new HashMap<>();
+        this.accessQueue = new LinkedList<>();
     }
 
     public V get(K key) {
         return Optional.ofNullable(cache.get(key))
                 .map(value -> {
-                    updateKeyOrder(key);
+                updateAccessOrder(key);
                     return value;
                 })
                 .orElse(null);
     }
 
     public void put(K key, V value) {
-        if (capacity == 0) {
-            return;
-        }
-        cache.compute(key, (k, v) -> {
-            if (v != null) {
-                updateKeyOrder(k);
-                return value;
-            } else {
-                if (cache.size() >= capacity) {
-                    evict();
-                }
-                keyOrder.add(key);
-                return value;
+        if (cache.containsKey(key)) {
+            updateAccessOrder(key);
+        } else {
+            if (cache.size() >= capacity) {
+                evict();
             }
-        });
+            cache.put(key, value);
+            updateAccessOrder(key);
+        }
     }
 
     public Collection<V> getAllValues() {
         return cache.values();
     }
 
-    private void updateKeyOrder(K key) {
-        keyOrder.remove(key);
-        keyOrder.add(key);
+    private void updateAccessOrder(K key) {
+        accessOrder.put(key, accessOrder.size() + 1);
+        accessQueue.remove(key);
+        accessQueue.addLast(key);
     }
 
     public void delete(K key) {
         cache.remove(key);
-        keyOrder.remove(key);
+        accessOrder.remove(key);
+        accessQueue.remove(key);
     }
 
     public void evict() {
-        K evictKey = keyOrder.iterator().next();
-        keyOrder.remove(evictKey);
-        cache.remove(evictKey);
+        K leastRecentlyUsed = accessQueue.pollFirst();
+        if (leastRecentlyUsed != null) {
+            cache.remove(leastRecentlyUsed);
+            accessOrder.remove(leastRecentlyUsed);
+        }
     }
 
     @Override

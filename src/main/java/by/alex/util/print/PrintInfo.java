@@ -25,7 +25,7 @@ public class PrintInfo {
     public static final String CLEVERTEC_TEMPLATE_PDF = "src/main/resources/Clevertec_Template.pdf";
     public static final String CLEVERTEC_TEMPLATE_PDF_WEB = "Clevertec_Template.pdf";
 
-    public <T> void print(T object) {
+    public <T> void savePdfObjectToFile(T object) {
         PdfDocument pdf = createPdf(object.getClass().getSimpleName());
         Document document = createDocument(object, pdf);
         Paragraph paragraph = createParagraphPrintInfo(object);
@@ -45,7 +45,7 @@ public class PrintInfo {
         return pdf;
     }
 
-    public void printAll(Collection<?> list) {
+    public void saveAllPdfObjectToFile(Collection<?> list) {
 
         Object firstObject = list.iterator().next();
         Class<?> objectClass = firstObject.getClass();

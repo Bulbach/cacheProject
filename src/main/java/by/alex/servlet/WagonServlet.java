@@ -6,8 +6,6 @@ import by.alex.exceptions.CacheException;
 import by.alex.service.WagonService;
 import by.alex.util.print.PrintInfo;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.itextpdf.kernel.pdf.PdfDocument;
 
 import javax.servlet.ServletException;
@@ -37,44 +35,22 @@ public class WagonServlet extends HttpServlet {
         gson = new Gson();
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        String pathInfo = request.getPathInfo();
-        String[] pathParts = pathInfo.split("/");
-        String action = pathParts[1];
-
-        switch (action) {
-            case "create":
-                createUser(request, response);
-                break;
-            case "delete":
-                deleteUnit(request, response);
-                break;
-            case "update":
-                updateUnit(request, response);
-                break;
-            default:
-                doGet(request, response);
-                break;
-        }
-    }
-
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+
         String pathInfo = request.getPathInfo();
         String[] pathParts = pathInfo.split("/");
         String action = pathParts[1];
 
-        System.out.println(action);
         switch (action) {
-            case "wagons":
-                showAllUnits(request, response);
-                break;
             case "wagon":
                 getById(request, response);
                 break;
             case "wagon-pdf":
                 getByIdPdf(request, response);
+                break;
+            case "wagons":
+                showAllUnits(request, response);
                 break;
             default:
                 break;
@@ -83,141 +59,67 @@ public class WagonServlet extends HttpServlet {
 
     private void getById(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        String unitId = request.getParameter("id");
-
-
-        UUID id = UUID.fromString(unitId);
-        WagonDto wagon = wagonService.getById(id);
-
-        String wagonsJson = gson.toJson(wagon);
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        try {
-            response.getWriter().write(wagonsJson);
-        } catch (IOException e) {
-            response.setContentType("text/plain");
+        WagonDto wagon;
+        UUID id;
+        String pathInfo = request.getPathInfo();
+        String parseID = parseID(pathInfo);
+        if (isParameterUUID(parseID)) {
+            id = getUUID(parseID);
+        } else {
+            String unitId = request.getParameter("id");
+            id = UUID.fromString(unitId);
+        }
+        if (wagonService.isExist(id)) {
+            wagon = wagonService.getById(id);
+            String wagonsJson = gson.toJson(wagon);
+            response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Invalid or missing 'id' parameter.");
-            throw new RuntimeException(e);
+            try {
+                response.getWriter().write(wagonsJson);
+            } catch (IOException e) {
+                getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid or missing 'id' parameter.");
+                throw new RuntimeException(e);
+            }
+        } else {
+            getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Неверный или отсутствующий параметр 'id'.");
         }
     }
 
     private void getByIdPdf(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String unitId = request.getParameter("id");
 
-        if (unitId != null) {
-            UUID id = UUID.fromString(unitId);
-            WagonDto wagon = wagonService.getById(id);
-            try (OutputStream out = response.getOutputStream()) {
-                PdfDocument printObject = printInfo.getPdfObject(wagon, out);
-                byte[] xmpMetadata = printObject.getXmpMetadata();
-                response.setContentType("application/pdf");
-                response.setCharacterEncoding("UTF-8");
-                response.addHeader("Content-Disposition", "inline; filename=\"wagon.pdf\"");
-                response.setContentLength(xmpMetadata.length);
-                response.getOutputStream().write(xmpMetadata);
-                response.flushBuffer();
-
-            } catch (CacheException | IOException e) {
-                response.setContentType("text/plain");
-                response.setCharacterEncoding("UTF-8");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Ошибка при генерации PDF.");
-                throw new RuntimeException(e);
-            }
-        } else {
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Неверный или отсутствующий параметр 'id'.");
-        }
-    }
-
-    private void updateUnit(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String json = getRequestParametrsToJson(request);
-        if (json != null) {
-            WagonDto wagonDto = gson.fromJson(json, WagonDto.class);
-            WagonDto updatedWagon = wagonService.update(wagonDto);
-
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            if (updatedWagon != null) {
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().write("Wagon with ID " + updatedWagon.getId() + " has been updated successfully.");
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().write("Wagon not found or failed to update.");
-            }
-        } else {
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Invalid or missing parameters for updating wagon.");
-        }
-    }
-
-    private void createUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        String json = getRequestParametrsToJson(request);
-        if (json != null) {
-            WagonDto wagonDto = gson.fromJson(json, WagonDto.class);
-            WagonDto createdWagon = wagonService.create(wagonDto);
-
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write("Wagon with ID " + createdWagon.getId() + " has been created successfully.");
-
-        } else {
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Invalid or missing parameters for creating wagon.");
-        }
-    }
-
-    private void deleteUnit(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        String idParameter = request.getParameter("id");
-        if (idParameter != null) {
-            UUID id = UUID.fromString(idParameter);
-            wagonService.delete(id);
-
-        } else {
-            String json = getRequestParametrsToJson(request);
-            if (json != null) {
-                JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-                if (jsonObject.has("id")) {
-                    String idFromJson = jsonObject.get("id").getAsString();
-                    UUID id = UUID.fromString(idFromJson);
-                    wagonService.delete(id);
-
-                    response.setContentType("text/plain");
+        String pathInfo = request.getPathInfo();
+        String parseID = parseID(pathInfo);
+        if (isParameterUUID(parseID)) {
+            UUID id = getUUID(parseID);
+            if (wagonService.isExist(id)) {
+                WagonDto wagon = wagonService.getById(id);
+                try (OutputStream out = response.getOutputStream()) {
+                    PdfDocument printObject = printInfo.getPdfObject(wagon, out);
+                    byte[] xmpMetadata = printObject.getXmpMetadata();
+                    response.setContentType("application/pdf");
                     response.setCharacterEncoding("UTF-8");
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().write("Wagon with ID " + id + " has been deleted successfully.");
-                } else {
-                    response.setContentType("text/plain");
-                    response.setCharacterEncoding("UTF-8");
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Invalid or missing 'id' parameter.");
+                    response.addHeader("Content-Disposition", "inline; filename=\"wagon.pdf\"");
+                    response.setContentLength(xmpMetadata.length);
+                    response.getOutputStream().write(xmpMetadata);
+                    response.flushBuffer();
+
+                } catch (CacheException | IOException e) {
+                    getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Ошибка при генерации PDF.");
+                    throw new RuntimeException(e);
                 }
+            } else {
+                getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Неверный или отсутствующий параметр 'id'.");
             }
+        } else {
+            getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Неверный или отсутствующий параметр 'id'.");
         }
     }
 
-    private static String getRequestParametrsToJson(HttpServletRequest request) throws IOException {
-
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try (BufferedReader reader = request.getReader()) {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append('\n');
-            }
-        }
-        return sb.toString();
+    private static void getNotFoundAnswer(HttpServletResponse response, int scBadRequest, String s) throws IOException {
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(scBadRequest);
+        response.getWriter().write(s);
     }
 
     private void showAllUnits(HttpServletRequest request, HttpServletResponse response) {
@@ -227,8 +129,8 @@ public class WagonServlet extends HttpServlet {
             page = Integer.parseInt(request.getParameter("page"));
         }
         int pageSize = 20;
-        if (request.getParameter("page-size") != null) {
-            pageSize = Integer.parseInt(request.getParameter("page-size"));
+        if (request.getParameter("per_page") != null) {
+            pageSize = Integer.parseInt(request.getParameter("per_page"));
         }
 
         List<WagonDto> wagons = Collections.unmodifiableList(wagonService.getAll(page, pageSize));
@@ -244,5 +146,89 @@ public class WagonServlet extends HttpServlet {
         }
     }
 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String json = getRequestParametersToJson(request);
+        if (json != null) {
+            WagonDto wagonDto = gson.fromJson(json, WagonDto.class);
+            if (wagonService.isExist(wagonDto.getWagonNumber())) {
 
+                getNotFoundAnswer(response, HttpServletResponse.SC_OK, "Wagon with ID " + wagonDto.getWagonNumber() + " is already exist.");
+            } else {
+                WagonDto createdWagon = wagonService.create(wagonDto);
+
+                getNotFoundAnswer(response, HttpServletResponse.SC_OK, "Wagon with ID " + createdWagon.getId() + " has been created successfully.");
+            }
+        } else {
+            getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid or missing parameters for creating wagon.");
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String json = getRequestParametersToJson(request);
+        if (json != null) {
+            WagonDto wagonDto = gson.fromJson(json, WagonDto.class);
+            WagonDto updatedWagon = wagonService.update(wagonDto);
+
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            if (updatedWagon != null) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write("Wagon with ID " + updatedWagon.getId() + " has been updated successfully.");
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("Wagon not found or failed to update.");
+            }
+        } else {
+            getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid or missing parameters for updating wagon.");
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        String pathInfo = request.getPathInfo();
+        String parseID = parseID(pathInfo);
+        if (isParameterUUID(parseID)) {
+            UUID id = getUUID(parseID);
+            wagonService.delete(id);
+
+            getNotFoundAnswer(response, HttpServletResponse.SC_OK, "Wagon with ID " + id + " has been deleted successfully.");
+        } else {
+            getNotFoundAnswer(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid or missing 'id' parameter.");
+        }
+    }
+
+    private static String getRequestParametersToJson(HttpServletRequest request) throws IOException {
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+        }
+        return sb.toString();
+    }
+
+    private String parseID(String requestPath) {
+        String[] parts = requestPath.split("/");
+        int length = parts.length;
+        return parts[length - 1].replaceAll("\"", "");
+    }
+
+    private UUID getUUID(String path) {
+        UUID id = null;
+        if (isParameterUUID(path)) {
+            String parseID = parseID(path);
+            id = UUID.fromString(parseID);
+        }
+        return id;
+    }
+
+    private static boolean isParameterUUID(String path) {
+        return path.matches("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
+    }
 }
+

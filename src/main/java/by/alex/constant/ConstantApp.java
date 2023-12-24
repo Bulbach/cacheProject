@@ -10,6 +10,7 @@ public interface ConstantApp {
 
 
     String DDL_INITIALIZATION_SCRIPT_PATH = "database/DDL_myBase.sql";
+
     String DML_INITIALIZATION_SCRIPT_PATH = "database/DML_myBase.sql";
     String DDL_INITIALIZATION_DROP_PATH = "database/Drop_myBase.sql";
 }
