@@ -20,7 +20,7 @@ public class ApplicationProperties {
         ) {
             Yaml yaml = new Yaml();
             Map<String, Map<String, String>> data = yaml.load(inputStream);
-            properties = data.get("database");
+            properties = data.get("db");
             cacheProperties = data.get("cache");
         } catch (Exception e) {
 

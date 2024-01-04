@@ -1,52 +1,42 @@
 package by.alex.repository.impl;
 
-import by.alex.connector.DataBaseConnector;
 import by.alex.entity.Wagon;
 import by.alex.mapper.impl.WagonResultSetMapperImpl;
 import by.alex.repository.WagonRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public class WagonRepositoryImpl implements WagonRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
+    private JdbcTemplate jdbcTemplate;
 
-    public WagonRepositoryImpl() {
-
-        try {
-            dataSource = DataBaseConnector.getInstance().getDataSource();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public WagonRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
-
     @Override
     public Collection<Wagon> findAll() {
 
         String sql = "SELECT w.id, w.wagonNumber, w.loadCapacity, w.yearOfConstruction, w.dateOfLastService FROM wagons w";
         RowMapper<Wagon> rowMapper = new WagonResultSetMapperImpl();
-        List<Wagon> wagons = jdbcTemplate.query(sql, rowMapper);
-        return wagons;
+
+        return jdbcTemplate.query(sql, rowMapper);
     }
 
-//    @Override
+    //    @Override
     public Collection<Wagon> findAll(int page, int pageSize) {
-        int offset = (page - 1) * pageSize;  // Вычисляем смещение на основе номера страницы
+
+        int offset = (page - 1) * pageSize;
         String sql = "SELECT w.id, w.wagonNumber, w.loadCapacity, w.yearOfConstruction, w.dateOfLastService FROM wagons w LIMIT ? OFFSET ?";
         RowMapper<Wagon> rowMapper = new WagonResultSetMapperImpl();
-        List<Wagon> wagons = jdbcTemplate.query(sql, rowMapper, pageSize, offset);
-        return wagons;
+
+        return jdbcTemplate.query(sql, rowMapper, pageSize, offset);
     }
 
     @Override
@@ -55,78 +45,55 @@ public class WagonRepositoryImpl implements WagonRepository {
         String sql = "SELECT * FROM wagons WHERE id = ?";
         RowMapper<Wagon> rowMapper = new WagonResultSetMapperImpl();
         List<Wagon> wagons = jdbcTemplate.query(sql, new Object[]{id}, rowMapper);
-        if (!wagons.isEmpty()) {
-            return Optional.of(wagons.get(0));
-        }
-        return Optional.empty();
+
+        return wagons.isEmpty() ? Optional.empty() : Optional.of(wagons.get(0));
     }
 
-    @Override
     public Wagon create(Wagon item) {
-        String sql = "INSERT INTO wagons (id, wagonNumber, loadCapacity, yearOfConstruction, dateOfLastService) " +
-                "VALUES (?, ?, ?, ?, ?)";
+
+        String sql = "INSERT INTO wagons (id, wagonNumber, loadCapacity, yearOfConstruction, dateOfLastService) VALUES (?, ?, ?, ?, ?)";
         UUID uuid = UUID.randomUUID();
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setObject(1, uuid);
-            statement.setString(2, item.getWagonNumber());
-            statement.setDouble(3, item.getLoadCapacity());
-            statement.setInt(4, item.getYearOfConstruction());
-            statement.setDate(5, java.sql.Date.valueOf(item.getDateOfLastService()));
+        jdbcTemplate.update(sql
+                , uuid
+                , item.getWagonNumber()
+                , item.getLoadCapacity()
+                , item.getYearOfConstruction()
+                , java.sql.Date.valueOf(item.getDateOfLastService()));
 
-            statement.executeUpdate();
-            return findById(uuid).orElseThrow();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create wagon. No generated key obtained." + e.getMessage());
-        }
+        return findById(uuid).orElseThrow();
     }
 
     public Wagon update(Wagon item) {
-        String sql = "UPDATE wagons SET wagonNumber = ?, loadCapacity = ?, yearOfConstruction = ?, " +
-                "dateOfLastService = ? WHERE id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setString(1, item.getWagonNumber());
-            statement.setDouble(2, item.getLoadCapacity());
-            statement.setInt(3, item.getYearOfConstruction());
-            statement.setDate(4, java.sql.Date.valueOf(item.getDateOfLastService()));
-            statement.setObject(5, item.getId());
 
-            int rowsAffected = statement.executeUpdate();
-            if (rowsAffected == 0) {
-                throw new SQLException("Failed to update wagon. No rows affected.");
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to update wagon. " + e.getMessage());
+        String sql =
+                "UPDATE wagons SET wagonNumber = ?, loadCapacity = ?, yearOfConstruction = ?, dateOfLastService = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql
+                , item.getWagonNumber()
+                , item.getLoadCapacity()
+                , item.getYearOfConstruction()
+                , java.sql.Date.valueOf(item.getDateOfLastService())
+                , item.getId());
+
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Failed to update wagon. No rows affected.");
         }
 
         return findById(item.getId()).orElseThrow();
     }
 
-    @Override
     public void delete(UUID id) {
+
         String sql = "DELETE FROM wagons WHERE id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setObject(1, id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to delete wagon. " + e.getMessage());
-        }
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
     public Optional<Wagon> findByWagonNumber(String wagonNumber) {
+
         String sql = "SELECT * FROM wagons WHERE wagonNumber = ?";
         RowMapper<Wagon> rowMapper = new WagonResultSetMapperImpl();
         List<Wagon> wagons = jdbcTemplate.query(sql, new Object[]{wagonNumber}, rowMapper);
-        if (!wagons.isEmpty()) {
-            return Optional.of(wagons.get(0));
-        }
-        return Optional.empty();
+
+        return wagons.isEmpty() ? Optional.empty() : Optional.of(wagons.get(0));
     }
 }

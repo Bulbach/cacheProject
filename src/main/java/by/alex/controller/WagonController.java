@@ -1,13 +1,16 @@
-package by.alex.servlet;
+package by.alex.controller;
 
-import by.alex.Runner;
 import by.alex.dto.WagonDto;
 import by.alex.exceptions.CacheException;
 import by.alex.service.WagonService;
 import by.alex.util.print.PrintInfo;
 import com.google.gson.Gson;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -20,19 +23,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@WebServlet("/wagons/*")
-public class WagonServlet extends HttpServlet {
-
+@WebServlet(name = "wagons", value = "/wagons/*", loadOnStartup = 1)
+@Controller
+@Slf4j
+public class WagonController extends HttpServlet {
+    @Autowired
     private WagonService wagonService;
+
     private Gson gson;
     private PrintInfo printInfo;
 
     @Override
-    public void init() throws ServletException {
-        Runner runner = new Runner();
-        printInfo = new PrintInfo();
-        wagonService = runner.getObject(WagonService.class);
-        gson = new Gson();
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+
+        this.gson = new Gson();
+        this.printInfo = new PrintInfo();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
