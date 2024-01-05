@@ -2,11 +2,12 @@ package by.alex.mapper.impl;
 
 import by.alex.entity.Wagon;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-
+@Component
 public class WagonResultSetMapperImpl implements RowMapper<Wagon> {
 
     @Override

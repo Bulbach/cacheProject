@@ -10,6 +10,8 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +20,8 @@ import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-
+@Slf4j
+@Component
 public class PrintInfo {
 
     private static final String OUTPUT_PDF = "output";
