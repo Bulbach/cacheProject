@@ -12,6 +12,9 @@ import by.alex.repository.WagonRepository;
 import by.alex.service.WagonService;
 import by.alex.validation.ValidationEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,11 +22,19 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class WagonServiceImpl implements WagonService {
 
-    private final WagonRepository wagonRepository;
-    private final WagonMapper wagonMapper;
+    private  WagonRepository wagonRepository;
+
+    private  WagonMapper wagonMapper;
+    @Autowired
+    public WagonServiceImpl( WagonRepository wagonRepository, WagonMapper wagonMapper) {
+        this.wagonRepository = wagonRepository;
+        this.wagonMapper = wagonMapper;
+    }
 
     @Override
     @CustomCachableGet
