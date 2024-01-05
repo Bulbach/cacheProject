@@ -25,7 +25,7 @@ public class LRUCache<K, V> implements AbstractCache<K, V> {
     private final Map<K, Integer> accessOrder;
     private final Deque<K> accessQueue;
 
-    public LRUCache(int capacity) {
+    public  LRUCache(int capacity) {
         this.capacity = capacity;
         this.cache = new HashMap<>();
         this.accessOrder = new HashMap<>();

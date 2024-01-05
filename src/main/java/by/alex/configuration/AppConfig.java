@@ -4,32 +4,31 @@ import by.alex.cache.AbstractCache;
 import by.alex.cache.impl.LFUCache;
 import by.alex.cache.impl.LRUCache;
 import by.alex.dto.WagonDto;
-import by.alex.util.YamlPropertySourceFactory;
-import by.alex.util.print.PrintInfo;
 import com.google.gson.Gson;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.UUID;
 
 
-@Configuration
-@WebListener
-@ComponentScan("by.alex")
-@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 @Slf4j
+@Configuration
+@EnableAspectJAutoProxy
 public class AppConfig {
 
     @Value("${spring.database.driver-class-name}")
@@ -47,40 +46,42 @@ public class AppConfig {
     private int CAPACITY_KEY;
 
     @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-        return new PropertySourcesPlaceholderConfigurer();
+    public static BeanFactoryPostProcessor beanFactoryPostProcessor() {
+
+        PropertySourcesPlaceholderConfigurer propertyConfigurer = new PropertySourcesPlaceholderConfigurer();
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(new ClassPathResource("application.yml"));
+        Properties yamlObject = Objects.requireNonNull(yaml.getObject(), "Could not load yml");
+        propertyConfigurer.setProperties(yamlObject);
+        return propertyConfigurer;
     }
 
     @Bean
     public DataSource getDataSource() throws SQLException, PropertyVetoException {
-        ComboPooledDataSource dataSource = new ComboPooledDataSource();
-        dataSource.setDriverClass(DATABASE_DRIVER);
-        dataSource.setJdbcUrl(DATABASE_URL);
-        dataSource.setUser(DATABASE_USER);
-        dataSource.setPassword(DATABASE_PASSWORD);
-        dataSource.setInitialPoolSize(5);
-        dataSource.setMinPoolSize(3);
-        dataSource.setMaxPoolSize(10);
+        HikariDataSource hikariDataSource = new HikariDataSource();
+        hikariDataSource.setDriverClassName(DATABASE_DRIVER);
+        hikariDataSource.setJdbcUrl(DATABASE_URL);
+        hikariDataSource.setUsername(DATABASE_USER);
+        hikariDataSource.setPassword(DATABASE_PASSWORD);
+        hikariDataSource.setMinimumIdle(3);
+        hikariDataSource.setMaximumPoolSize(10);
 
-        return dataSource;
+        log.info("create database");
+        return hikariDataSource;
     }
 
     @Bean
-    JdbcTemplate jdbcTemplate() throws PropertyVetoException, SQLException {
+    public JdbcTemplate jdbcTemplate() throws PropertyVetoException, SQLException {
         return new JdbcTemplate(getDataSource());
     }
 
     @Bean
     public SpringLiquibase liquibase(DataSource dataSource) {
         SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setChangeLog("classpath:database/changelog.yaml");
+        liquibase.setChangeLog("classpath:db/changelog.yaml");
         liquibase.setDataSource(dataSource);
-        return liquibase;
-    }
 
-    @Bean
-    public PrintInfo printInfo() {
-        return new PrintInfo();
+        return liquibase;
     }
 
     @Bean

@@ -1,3 +1,4 @@
+--changeset alex:fillTable-wagons
 insert into wagons (id, wagonNumber, loadCapacity, yearOfConstruction, dateOfLastService)
 values
     ('11111111-1111-1111-1111-111111111111', 'WGN001', 5000, 2020, '2022-01-01'),

@@ -13,8 +13,12 @@
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{35}) - %msg %n</pattern>
+        </encoder>
+    </appender>
+    <appender name="temp" class="ch.qos.logback.classic.Logger">
         <encoder>
             <charset>UTF-8</charset>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{35}) - %msg %n</pattern>
@@ -25,5 +29,6 @@
         <level value="TRACE"/>
         <appender-ref ref="roll-by-time"/>
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="temp"/>
     </root>
 </configuration>

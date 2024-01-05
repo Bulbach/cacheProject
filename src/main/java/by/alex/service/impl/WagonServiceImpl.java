@@ -22,16 +22,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class WagonServiceImpl implements WagonService {
 
     private  WagonRepository wagonRepository;
 
     private  WagonMapper wagonMapper;
-
-    public WagonServiceImpl(@Autowired WagonRepository wagonRepository,@Autowired WagonMapper wagonMapper) {
+    @Autowired
+    public WagonServiceImpl( WagonRepository wagonRepository, WagonMapper wagonMapper) {
         this.wagonRepository = wagonRepository;
         this.wagonMapper = wagonMapper;
     }

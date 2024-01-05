@@ -2,21 +2,23 @@ package by.alex.aspect;
 
 import by.alex.cache.AbstractCache;
 import by.alex.dto.WagonDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Aspect
 @Slf4j
+@Aspect
+@Component
+@RequiredArgsConstructor
 public class CachingAspect {
 
-    @Autowired
-    private AbstractCache<UUID, WagonDto> cache;
+    private final AbstractCache<UUID, WagonDto> cache;
 
     @Pointcut("@annotation(by.alex.annotation.CustomCachableGet)")
     public void getId() {
@@ -31,7 +33,7 @@ public class CachingAspect {
             return cache.get(id);
         } else {
             WagonDto wagon = (WagonDto) joinPoint.proceed();
-            log.info("Founded wagon in repository");
+            log.info("Founded cache wagon in repository");
             cache.put(id, wagon);
             return wagon;
         }
@@ -45,7 +47,7 @@ public class CachingAspect {
     public Object cacheCreate(ProceedingJoinPoint joinPoint) throws Throwable {
 
         WagonDto createdWagonDto = (WagonDto) joinPoint.proceed();
-        log.info("Created wagon " + createdWagonDto);
+        log.info("Created cache wagon " + createdWagonDto);
         cache.put(createdWagonDto.getId(), createdWagonDto);
 
         return createdWagonDto;
@@ -59,7 +61,7 @@ public class CachingAspect {
     public Object cacheUpdate(ProceedingJoinPoint joinPoint) throws Throwable {
 
         WagonDto updated = (WagonDto) joinPoint.proceed();
-        log.info("Updated wagon " + updated);
+        log.info("Updated cache wagon " + updated);
         cache.put(updated.getId(), updated);
         return updated;
     }
@@ -72,7 +74,7 @@ public class CachingAspect {
     public Object cacheDelete(ProceedingJoinPoint joinPoint) throws Throwable {
 
         UUID id = (UUID) joinPoint.getArgs()[0];
-        log.info("Deleted wagon with id = " + id);
+        log.info("Deleted cache wagon with id = " + id);
         cache.delete(id);
 
         return joinPoint.proceed();

@@ -6,16 +6,14 @@ import by.alex.service.WagonService;
 import by.alex.util.print.PrintInfo;
 import com.google.gson.Gson;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,28 +21,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@WebServlet(name = "wagons", value = "/wagons/*", loadOnStartup = 1)
-@Controller
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class WagonController extends HttpServlet {
-    @Autowired
-    private WagonService wagonService;
-
-    private Gson gson;
-    private PrintInfo printInfo;
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-
-        this.gson = new Gson();
-        this.printInfo = new PrintInfo();
-    }
+    private final WagonService wagonService;
+    private final Gson gson;
+    private final PrintInfo printInfo;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         String pathInfo = request.getPathInfo();
+        log.info("PathInfo" + pathInfo + " in servlet method doGet");
         String[] pathParts = pathInfo.split("/");
         String action = pathParts[1];
 
@@ -68,6 +57,7 @@ public class WagonController extends HttpServlet {
         WagonDto wagon;
         UUID id;
         String pathInfo = request.getPathInfo();
+        log.info("PathInfo" + pathInfo + " in servlet method getById");
         String parseID = parseID(pathInfo);
         if (isParameterUUID(parseID)) {
             id = getUUID(parseID);
@@ -94,6 +84,7 @@ public class WagonController extends HttpServlet {
     private void getByIdPdf(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String pathInfo = request.getPathInfo();
+        log.info("PathInfo" + pathInfo + " in servlet method getByIdPdf");
         String parseID = parseID(pathInfo);
         if (isParameterUUID(parseID)) {
             UUID id = getUUID(parseID);
@@ -148,12 +139,14 @@ public class WagonController extends HttpServlet {
         try {
             response.getWriter().write(wagonsJson);
         } catch (IOException e) {
+            log.error("Mistake with method showAllUnits" + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+
         String json = getRequestParametersToJson(request);
         if (json != null) {
             WagonDto wagonDto = gson.fromJson(json, WagonDto.class);
@@ -172,6 +165,7 @@ public class WagonController extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
         String json = getRequestParametersToJson(request);
         if (json != null) {
             WagonDto wagonDto = gson.fromJson(json, WagonDto.class);

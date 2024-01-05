@@ -3,6 +3,7 @@ package by.alex.repository.impl;
 import by.alex.entity.Wagon;
 import by.alex.mapper.impl.WagonResultSetMapperImpl;
 import by.alex.repository.WagonRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+@Slf4j
 @Repository
 public class WagonRepositoryImpl implements WagonRepository {
 
